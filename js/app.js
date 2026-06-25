@@ -153,9 +153,11 @@ const App = {
 
     const dots = document.getElementById('stepperDots');
     if (!dots.children.length) {
-      ['Datos','Correcciones','NPK','Extras','Resultados','Historial'].forEach((label) => {
+      ['Datos','Correcciones','NPK','Extras','Resultados','Historial'].forEach((label, i) => {
         const d = document.createElement('span');
         d.className = 'stepper__dot'; d.textContent = label;
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => this.goToStep(i));
         dots.appendChild(d);
       });
     }
@@ -241,14 +243,21 @@ const App = {
       return;
     }
     container.innerHTML = list.map((p) => `
-      <div class="history-item">
-        <div class="history-item__main">
-          <div class="history-item__name">${this.esc(p.name)}</div>
-          <div class="history-item__meta">${new Date(p.date).toLocaleString('es-CL')} · ${fmt(p.total?.sacos || 0, 0)} sacos · ${fmtMoney(p.total?.costo || 0)}</div>
+      <div class="history-item history-item--col">
+        <div class="history-item__row">
+          <div class="history-item__main">
+            <div class="history-item__name">${this.esc(p.name)}</div>
+            <div class="history-item__meta">${new Date(p.date).toLocaleString('es-CL')} · ${fmt(p.total?.sacos || 0, 0)} sacos · ${fmtMoney(p.total?.costo || 0)}</div>
+          </div>
+          <div class="history-item__actions">
+            <button class="btn btn--sm btn--ghost" data-load="${p.id}">📂 Cargar</button>
+            <button class="btn btn--sm btn--danger" data-del="${p.id}">✕</button>
+          </div>
         </div>
-        <div class="history-item__actions">
-          <button class="btn btn--sm btn--ghost" data-load="${p.id}">Cargar</button>
-          <button class="btn btn--sm btn--danger" data-del="${p.id}">✕</button>
+        <div class="history-item__dl">
+          <button class="btn btn--sm btn--primary" data-pdf="${p.id}">📄 PDF</button>
+          <button class="btn btn--sm btn--ghost" data-word="${p.id}">📝 Word</button>
+          <button class="btn btn--sm btn--ghost" data-xls="${p.id}">📊 Excel</button>
         </div>
       </div>`).join('');
 
@@ -264,6 +273,18 @@ const App = {
         });
       };
     });
+    // Descargas desde historial
+    const exportPlan = (id, fmt) => {
+      const plan = Storage.getPlan(id);
+      if (!plan) return;
+      const calc = calcPlan(plan.state || {});
+      if (fmt === 'pdf') Export.pdf(plan.state, calc);
+      if (fmt === 'word') Export.word(plan.state, calc);
+      if (fmt === 'xls') Export.excel(plan.state, calc);
+    };
+    container.querySelectorAll('[data-pdf]').forEach((btn) => btn.onclick = () => exportPlan(btn.dataset.pdf, 'pdf'));
+    container.querySelectorAll('[data-word]').forEach((btn) => btn.onclick = () => exportPlan(btn.dataset.word, 'word'));
+    container.querySelectorAll('[data-xls]').forEach((btn) => btn.onclick = () => exportPlan(btn.dataset.xls, 'xls'));
   },
 
   loadPlan(id) {
@@ -276,14 +297,16 @@ const App = {
   },
 
   bindHistoryActions() {
-    document.getElementById('exportJsonBtn').addEventListener('click', () => {
-      const data = Storage.exportAll();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `FertiCalc_backup_${Date.now()}.json`;
-      a.click(); URL.revokeObjectURL(url);
-      this.toast('Backup exportado');
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      this.showModal({
+        title: 'Borrar historial', sub: 'Se eliminarán todos los planes guardados. Esta acción no se puede deshacer.',
+        okText: 'Borrar todo',
+        onOk: () => {
+          localStorage.removeItem(Storage.HISTORY_KEY);
+          this.renderHistory();
+          this.toast('Historial borrado');
+        },
+      });
     });
     document.getElementById('importJsonInput').addEventListener('change', (e) => {
       const file = e.target.files[0];

@@ -110,9 +110,12 @@ body {
 .stepper__dots { display: flex; justify-content: space-between; margin-top: 8px; }
 .stepper__dot {
   font-size: 10px; color: var(--text-tertiary);
-  transition: color 0.3s, font-weight 0.3s;
-  white-space: nowrap;
+  transition: color 0.3s, font-weight 0.3s, transform 0.15s;
+  white-space: nowrap; cursor: pointer;
+  padding: 2px 4px; border-radius: 4px;
 }
+.stepper__dot:hover { color: var(--text); background: var(--fill); }
+.stepper__dot:active { transform: scale(0.95); }
 .stepper__dot.active { color: var(--accent); font-weight: 700; }
 
 /* ---------- Main ---------- */
@@ -308,6 +311,10 @@ body {
   padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow);
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
+.history-item--col { flex-direction: column; align-items: stretch; gap: 12px; }
+.history-item__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.history-item__dl { display: flex; gap: 8px; }
+.history-item__dl .btn { flex: 1; }
 .history-item__main { flex: 1; min-width: 0; }
 .history-item__name { font-weight: 600; font-size: 15px; }
 .history-item__meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }

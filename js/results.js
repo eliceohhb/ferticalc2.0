@@ -107,12 +107,14 @@ const Results = {
 
     // --- Barra de exportación ---
     const exportBar = `
+      <h3 class="card__title" style="margin:16px 4px 8px">📥 Descargar informe</h3>
       <div class="export-bar">
-        <button class="btn btn--ghost" id="exportPdf">📄 PDF</button>
+        <button class="btn btn--primary" id="exportPdf">📄 PDF</button>
+        <button class="btn btn--ghost" id="exportWord">📝 Word</button>
         <button class="btn btn--ghost" id="exportXls">📊 Excel</button>
         <button class="btn btn--ghost" id="exportImg">🖼️ Imagen</button>
         <button class="btn btn--ghost" id="exportLabels">🏷️ Etiquetas</button>
-        <button class="btn btn--primary" id="savePlan">💾 Guardar plan</button>
+        <button class="btn btn--ghost" id="savePlan">💾 Guardar</button>
       </div>`;
 
     container.innerHTML = metrics + ecoBlock + table + `<h3 class="card__title" style="margin:8px 4px">📝 Paso a paso</h3>` + details + chartsHtml + recHtml + exportBar;
@@ -135,6 +137,7 @@ const Results = {
 
     // --- Listeners export ---
     document.getElementById('exportPdf').addEventListener('click', () => Export.pdf(state, calc));
+    document.getElementById('exportWord').addEventListener('click', () => Export.word(state, calc));
     document.getElementById('exportXls').addEventListener('click', () => Export.excel(state, calc));
     document.getElementById('exportImg').addEventListener('click', () => Export.image());
     document.getElementById('exportLabels').addEventListener('click', () => Export.labels(state, calc));
