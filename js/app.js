@@ -341,10 +341,4 @@ const App = {
 // Arrancar
 document.addEventListener('DOMContentLoaded', () => App.init());
 
-// Escuchar cambios de tema para refrescar gráficos
-const _origToggle = Theme.toggle ? Theme.toggle.bind(Theme) : null;
-if (_origToggle) {
-  Theme.toggle = function () { _origToggle(); setTimeout(() => Charts.refresh(), 100); };
-}
-
 window.App = App;

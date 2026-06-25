@@ -1,13 +1,57 @@
 /* ============================================================
  * FertiCalc · style.css
- * Estilo Apple/iOS · Modo claro/oscuro · Diseño limpio
+ * Estilo Apple/iOS · Modo claro/oscuro · 5 paletas de color
  * ============================================================ */
 
-/* ---------- Variables tema ---------- */
+/* ---------- Paletas de acento ---------- */
+/* Default = Verde campo */
 :root {
   --accent: #248A3D;
   --accent-hover: #1c6e30;
   --accent-soft: rgba(36, 138, 61, 0.12);
+  --accent-rgb: 36, 138, 61;
+  --logo-from: #34C759;
+  --logo-to: #248A3D;
+}
+/* 🟣 Morado moderno */
+[data-accent="purple"] {
+  --accent: #AF52DE;
+  --accent-hover: #8E44AD;
+  --accent-soft: rgba(175, 82, 222, 0.14);
+  --accent-rgb: 175, 82, 222;
+  --logo-from: #BF5AF2;
+  --logo-to: #8E44AD;
+}
+/* 🔴 Rojo terracota */
+[data-accent="terra"] {
+  --accent: #C0392B;
+  --accent-hover: #962d22;
+  --accent-soft: rgba(192, 57, 43, 0.14);
+  --accent-rgb: 192, 57, 43;
+  --logo-from: #E74C3C;
+  --logo-to: #C0392B;
+}
+/* 🔵 Azul océano */
+[data-accent="blue"] {
+  --accent: #0A84FF;
+  --accent-hover: #0066cc;
+  --accent-soft: rgba(10, 132, 255, 0.14);
+  --accent-rgb: 10, 132, 255;
+  --logo-from: #32AEFF;
+  --logo-to: #0A84FF;
+}
+/* 🩵 Cian turquesa */
+[data-accent="cyan"] {
+  --accent: #00C7BE;
+  --accent-hover: #008B83;
+  --accent-soft: rgba(0, 199, 190, 0.16);
+  --accent-rgb: 0, 199, 190;
+  --logo-from: #40E0D0;
+  --logo-to: #00C7BE;
+}
+
+/* ---------- Variables base (tema) ---------- */
+:root {
   --danger: #FF3B30;
   --warning: #FF9500;
 
@@ -45,7 +89,6 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
   --fill: rgba(118, 118, 128, 0.24);
-  --accent-soft: rgba(52, 199, 89, 0.18);
 }
 
 /* ---------- Reset ---------- */
@@ -86,8 +129,9 @@ body {
   font-size: 26px;
   width: 38px; height: 38px;
   display: grid; place-items: center;
-  background: linear-gradient(135deg, #34C759, #248A3D);
+  background: linear-gradient(135deg, var(--logo-from), var(--logo-to));
   border-radius: 10px;
+  transition: background 0.3s;
 }
 .brand__text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand__name { font-weight: 700; font-size: 17px; }
@@ -348,6 +392,39 @@ body {
   box-shadow: var(--shadow-lg); max-width: 90%; text-align: center;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Selector de paletas ---------- */
+.palette-menu {
+  position: fixed; top: 60px; right: 16px;
+  background: var(--bg-grouped);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 8px; z-index: 250;
+  min-width: 180px;
+  border: 0.5px solid var(--separator);
+  display: none;
+}
+.palette-menu.open { display: block; animation: fadeIn 0.2s ease; }
+.palette-menu__title {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  padding: 6px 10px 10px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.palette-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px; border-radius: var(--radius);
+  cursor: pointer; transition: background 0.15s;
+}
+.palette-row:hover { background: var(--fill); }
+.palette-row.active { background: var(--accent-soft); }
+.palette-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  flex-shrink: 0; border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.palette-name { font-size: 14px; font-weight: 500; flex: 1; }
+.palette-check { font-size: 16px; opacity: 0; color: var(--accent); }
+.palette-row.active .palette-check { opacity: 1; }
+.palette-divider { height: 1px; background: var(--separator); margin: 4px 0; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 520px) {
