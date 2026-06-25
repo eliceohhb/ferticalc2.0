@@ -1,0 +1,17 @@
+{
+  "name": "FertiCalc · Agrologic",
+  "short_name": "FertiCalc",
+  "description": "Calculadora de planes de fertilización agrícola. Instituto Adolfo Matthei · Prof. Pedro Moll Medina.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f5f7",
+  "theme_color": "#248A3D",
+  "lang": "es-CL",
+  "categories": ["productivity", "education", "agriculture"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

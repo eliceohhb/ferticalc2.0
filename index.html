@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#248A3D" />
+  <meta name="description" content="FertiCalc (Agrologic) — Calculadora de planes de fertilización agrícola. Instituto Adolfo Matthei." />
+  <title>FertiCalc · Agrologic</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+
+  <!-- Fuente Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Librerías (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="app-header__inner">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">🌱</div>
+        <div class="brand__text">
+          <span class="brand__name">FertiCalc</span>
+          <span class="brand__tag">Agrologic</span>
+        </div>
+      </div>
+      <div class="app-header__actions">
+        <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">🌓</button>
+        <button class="icon-btn" id="installBtn" title="Instalar app" aria-label="Instalar app" hidden>⬇️</button>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="stepper" id="stepper">
+      <div class="stepper__track"><div class="stepper__bar" id="stepperBar"></div></div>
+      <div class="stepper__dots" id="stepperDots"></div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="app-main" id="appMain">
+
+    <!-- ---------- PASO 0 · DATOS ---------- -->
+    <section class="step" data-step="0">
+      <div class="step__head">
+        <span class="step__num">1</span>
+        <div>
+          <h2 class="step__title">Datos generales</h2>
+          <p class="step__sub">Información del cultivo y del terreno</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="field">
+          <span class="field__label">Cultivo rápido</span>
+          <select id="cropSelect" class="select">
+            <option value="">— Selecciona un cultivo —</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card">
+        <label class="field">
+          <span class="field__label">Nombre del cultivo</span>
+          <input type="text" id="cropName" class="input" placeholder="Ej. Trigo" />
+        </label>
+        <label class="field">
+          <span class="field__label">Superficie (ha)</span>
+          <input type="number" id="superficie" class="input" placeholder="8" step="0.1" min="0" />
+        </label>
+        <label class="field">
+          <span class="field__label">Tipo de suelo</span>
+          <select id="soilSelect" class="select">
+            <option value="">— Selecciona —</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">Requerimiento NPK (unidades · u/ha)</h3>
+        <p class="card__hint">1 u = 1 kg de nutriente puro por hectárea</p>
+        <div class="grid-3">
+          <label class="field">
+            <span class="field__label">N (u)</span>
+            <input type="number" id="reqN" class="input" placeholder="102" min="0" step="0.1" />
+          </label>
+          <label class="field">
+            <span class="field__label">P₂O₅ (u)</span>
+            <input type="number" id="reqP" class="input" placeholder="135" min="0" step="0.1" />
+          </label>
+          <label class="field">
+            <span class="field__label">K₂O (u)</span>
+            <input type="number" id="reqK" class="input" placeholder="117" min="0" step="0.1" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Cobertera N (u) — adicional, no se resta del N base</span>
+          <input type="number" id="reqCover" class="input" placeholder="0" min="0" step="0.1" />
+        </label>
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">Producción esperada</h3>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Unidad de cosecha</span>
+            <select id="yieldType" class="select">
+              <option value="qq">Quintales (qq)</option>
+              <option value="ton">Toneladas (ton)</option>
+              <option value="ms">Kg de Materia Seca</option>
+              <option value="unidad">Unidades (plantas)</option>
+              <option value="paquete">Paquetes</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field__label">Rendimiento (por ha)</span>
+            <input type="number" id="yieldValue" class="input" placeholder="60" min="0" step="0.1" />
+          </label>
+        </div>
+        <div class="grid-2 collapse" id="poblacionalGroup">
+          <label class="field">
+            <span class="field__label">Unidades plantadas</span>
+            <input type="number" id="unitsPlanted" class="input" placeholder="50000" min="0" />
+          </label>
+          <label class="field">
+            <span class="field__label">% pérdida poblacional</span>
+            <input type="number" id="perdida" class="input" placeholder="10" min="0" max="100" step="0.1" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PASO 1 · CORRECCIONES ---------- -->
+    <section class="step" data-step="1" hidden>
+      <div class="step__head">
+        <span class="step__num">2</span>
+        <div>
+          <h2 class="step__title">Correcciones del suelo</h2>
+          <p class="step__sub">Activa las correcciones que aplique el ejercicio</p>
+        </div>
+      </div>
+
+      <!-- pH -->
+      <div class="card">
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" id="usePH" />
+            <span class="toggle__track"></span>
+          </label>
+          <div>
+            <h3 class="card__title">Corrección de pH (CaCO₃)</h3>
+            <p class="card__hint">ton CaCO₃/ha = (pH deseado − pH inicial) ÷ Calcio del suelo (%)</p>
+          </div>
+        </div>
+        <div class="collapse" id="phGroup">
+          <div class="grid-3">
+            <label class="field">
+              <span class="field__label">pH inicial</span>
+              <input type="number" id="phIni" class="input" placeholder="5.19" step="0.01" />
+            </label>
+            <label class="field">
+              <span class="field__label">pH deseado</span>
+              <input type="number" id="phDes" class="input" placeholder="5.79" step="0.01" />
+            </label>
+            <label class="field">
+              <span class="field__label">Precio ton CaCO₃ ($)</span>
+              <input type="number" id="phPrecio" class="input" placeholder="102000" step="1" />
+            </label>
+          </div>
+          <p class="card__hint" id="phCaInfo"></p>
+        </div>
+      </div>
+
+      <!-- P suelo -->
+      <div class="card">
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" id="usePSuelo" />
+            <span class="toggle__track"></span>
+          </label>
+          <div>
+            <h3 class="card__title">Corrección de Fósforo (ppm)</h3>
+            <p class="card__hint">kg P₂O₅/ha = (ppm deseado − ppm inicial) × 2.29 × poder tampón</p>
+          </div>
+        </div>
+        <div class="collapse" id="pSueloGroup">
+          <div class="grid-3">
+            <label class="field">
+              <span class="field__label">P inicial (ppm)</span>
+              <input type="number" id="ppmIni" class="input" placeholder="11.9" step="0.01" />
+            </label>
+            <label class="field">
+              <span class="field__label">P deseado (ppm)</span>
+              <input type="number" id="ppmDes" class="input" placeholder="12.7" step="0.01" />
+            </label>
+            <label class="field">
+              <span class="field__label">Poder tampón</span>
+              <input type="number" id="pBuffer" class="input" placeholder="25" step="0.1" />
+            </label>
+          </div>
+          <label class="field">
+            <span class="field__label">Precio ton SFT ($)</span>
+            <input type="number" id="pSueloPrecio" class="input" placeholder="1285000" step="1" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PASO 2 · NPK ---------- -->
+    <section class="step" data-step="2" hidden>
+      <div class="step__head">
+        <span class="step__num">3</span>
+        <div>
+          <h2 class="step__title">Fertilización NPK</h2>
+          <p class="step__sub">Define fertilizantes y precios</p>
+        </div>
+      </div>
+
+      <!-- N base -->
+      <div class="card" id="nCard">
+        <h3 class="card__title">🟢 Nitrógeno base (eficiencia 65%)</h3>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Fertilizante</span>
+            <select id="nFert" class="select fert-select" data-nutrient="n"></select>
+          </label>
+          <label class="field">
+            <span class="field__label">% N</span>
+            <input type="number" id="nPct" class="input fert-pct" placeholder="27" step="0.1" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Precio ton ($)</span>
+          <input type="number" id="nPrecio" class="input" placeholder="925550" step="1" />
+        </label>
+      </div>
+
+      <!-- Cobertera -->
+      <div class="card" id="coverCard">
+        <h3 class="card__title">🌿 Cobertera N (ceil · no se resta del N base)</h3>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Fertilizante</span>
+            <select id="coverFert" class="select fert-select" data-nutrient="n"></select>
+          </label>
+          <label class="field">
+            <span class="field__label">% N</span>
+            <input type="number" id="coverPct" class="input fert-pct" placeholder="25" step="0.1" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Precio ton ($)</span>
+          <input type="number" id="coverPrecio" class="input" placeholder="980450" step="1" />
+        </label>
+      </div>
+
+      <!-- P -->
+      <div class="card" id="pCard">
+        <h3 class="card__title">🔵 Fósforo P₂O₅ (eficiencia 60%)</h3>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Fertilizante</span>
+            <select id="pFert" class="select fert-select" data-nutrient="p"></select>
+          </label>
+          <label class="field">
+            <span class="field__label">% P₂O₅</span>
+            <input type="number" id="pPct" class="input fert-pct" placeholder="46" step="0.1" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Precio ton ($)</span>
+          <input type="number" id="pPrecio" class="input" placeholder="1285000" step="1" />
+        </label>
+      </div>
+
+      <!-- K -->
+      <div class="card" id="kCard">
+        <h3 class="card__title">🟣 Potasio K₂O (eficiencia 90%)</h3>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Fertilizante</span>
+            <select id="kFert" class="select fert-select" data-nutrient="k"></select>
+          </label>
+          <label class="field">
+            <span class="field__label">% K₂O</span>
+            <input type="number" id="kPct" class="input fert-pct" placeholder="60" step="0.1" />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Precio ton ($)</span>
+          <input type="number" id="kPrecio" class="input" placeholder="1320000" step="1" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ---------- PASO 3 · EXTRAS ---------- -->
+    <section class="step" data-step="3" hidden>
+      <div class="step__head">
+        <span class="step__num">4</span>
+        <div>
+          <h2 class="step__title">Micronutrientes y adicionales</h2>
+          <p class="step__sub">Dosis directa (sin eficiencia de absorción)</p>
+        </div>
+      </div>
+      <div class="card">
+        <div id="microsContainer"></div>
+        <button class="btn btn--ghost" id="addMicro">＋ Agregar micronutriente</button>
+      </div>
+    </section>
+
+    <!-- ---------- PASO 4 · RESULTADOS ---------- -->
+    <section class="step" data-step="4" hidden>
+      <div class="step__head">
+        <span class="step__num">5</span>
+        <div>
+          <h2 class="step__title">Resultados</h2>
+          <p class="step__sub">Plan de fertilización calculado</p>
+        </div>
+      </div>
+      <div id="resultsContainer"></div>
+    </section>
+
+    <!-- ---------- PASO 5 · HISTORIAL ---------- -->
+    <section class="step" data-step="5" hidden>
+      <div class="step__head">
+        <span class="step__num">6</span>
+        <div>
+          <h2 class="step__title">Historial de planes</h2>
+          <p class="step__sub">Planes guardados en este dispositivo</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row-between">
+          <button class="btn btn--ghost" id="exportJsonBtn">⬆️ Exportar todo (JSON)</button>
+          <label class="btn btn--ghost" for="importJsonInput">⬇️ Importar JSON</label>
+          <input type="file" id="importJsonInput" accept="application/json" hidden />
+        </div>
+      </div>
+      <div id="historyContainer"></div>
+    </section>
+
+  </main>
+
+  <!-- ===== NAV ===== -->
+  <nav class="app-nav" id="appNav">
+    <button class="btn btn--ghost nav-btn" id="prevBtn">‹ Atrás</button>
+    <span class="nav-label" id="navLabel">Paso 1 de 6</span>
+    <button class="btn btn--primary nav-btn" id="nextBtn">Siguiente ›</button>
+  </nav>
+
+  <!-- ===== Scripts ===== -->
+  <script src="js/data.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/results.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+    }
+  </script>
+</body>
+</html>
