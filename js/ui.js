@@ -27,20 +27,13 @@ const UI = {
     document.querySelectorAll('.fert-select').forEach((sel) => {
       const nutrient = sel.dataset.nutrient;
       sel.appendChild(new Option('— Personalizado —', ''));
-      FERTILIZERS.filter((f) => !f.micro).forEach((f) => {
-        // Mostrar solo fertilizantes que tengan ese nutriente > 0
+      FERTILIZERS.filter((f) => {
         const val = f[nutrient];
-        if (val > 0 || nutrient === 'n') {
-          // Para N mostramos todos los nitrogenados; P y K solo los que aportan
-          if (val > 0) {
-            sel.appendChild(new Option(`${f.name} (${val}%)`, f.id));
-          }
-        }
+        return val && val > 0;
+      }).forEach((f) => {
+        const val = f[nutrient];
+        sel.appendChild(new Option(`${f.name} (${val}%)`, f.id));
       });
-      // N: permitir también fertilizantes con N (todos los nitrogenados ya entran)
-      if (nutrient === 'n') {
-        // ya agregados arriba por val>0
-      }
     });
   },
 
