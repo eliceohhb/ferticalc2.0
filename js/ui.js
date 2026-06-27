@@ -24,15 +24,17 @@ const UI = {
     });
 
     // Selectores de fertilizantes (por nutriente)
+    // Mostrar TODOS los fertilizantes con sus % reales, ordenados por relevancia
     document.querySelectorAll('.fert-select').forEach((sel) => {
       const nutrient = sel.dataset.nutrient;
       sel.appendChild(new Option('— Personalizado —', ''));
-      FERTILIZERS.filter((f) => {
-        const val = f[nutrient];
-        return val && val > 0;
-      }).forEach((f) => {
-        const val = f[nutrient];
-        sel.appendChild(new Option(`${f.name} (${val}%)`, f.id));
+      // Ordenar: primero los que tienen más del nutriente solicitado
+      const sorted = [...FERTILIZERS].sort((a, b) => (b[nutrient] || 0) - (a[nutrient] || 0));
+      sorted.forEach((f) => {
+        const val = f[nutrient] || 0;
+        // Etiqueta con el % principal y los nutrientes secundarios
+        let label = `${f.name} (${val}%)`;
+        sel.appendChild(new Option(label, f.id));
       });
     });
   },

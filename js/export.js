@@ -247,102 +247,184 @@ Aplicación de cálculo de fertilización agrícola · Eliceo Hernández</div>
   /* ============================================================
    * EXCEL PROFESIONAL (con colores, bordes y formato)
    * ============================================================ */
-  excel(state, calc) {
-    const wb = XLSX.utils.book_new();
-    wb.Props = {
-      Title: 'FertiCalc · Plan de Fertilización',
-      Author: 'FertiCalc Agrologic',
-      Company: 'Instituto Adolfo Matthei',
-    };
+  async excel(state, calc) {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'FertiCalc · Agrologic';
+    wb.company = 'Instituto Adolfo Matthei';
     const cropName = state.cropName || 'Cultivo';
     const date = new Date().toLocaleDateString('es-CL');
     const soil = SOILS.find((s) => s.id === state.soil);
     const items = this.buildItems(calc);
 
-    // Hoja 1: Resumen
-    const data = [];
-    data.push([{ v: 'FertiCalc · Agrologic', s: this.sTitle() }]);
-    data.push([{ v: 'Plan de Fertilización', s: this.sSub() }]);
-    data.push([{ v: `Generado: ${date}`, s: this.sMuted() }]);
-    data.push([]);
-    data.push([{ v: 'CULTIVO', s: this.sHeader() }, { v: cropName, s: this.sCell() }]);
-    data.push([{ v: 'SUPERFICIE', s: this.sHeader() }, { v: `${fmt(state.superficie,1)} ha`, s: this.sCell() }]);
-    data.push([{ v: 'SUELO', s: this.sHeader() }, { v: soil ? soil.name : '—', s: this.sCell() }]);
-    data.push([{ v: 'NPK REQUERIDO', s: this.sHeader() }, { v: `${fmt(state.npk.n,0)} / ${fmt(state.npk.p,0)} / ${fmt(state.npk.k,0)} u/ha`, s: this.sCell() }]);
-    if (state.npk.cover) data.push([{ v: 'COBERTERA', s: this.sHeader() }, { v: `${fmt(state.npk.cover,0)} u N`, s: this.sCell() }]);
-    data.push([]);
+    // Colores
+    const C = {
+      accent: 'FF248A3D', accentDark: 'FF1C6E30', white: 'FFFFFFFF',
+      greenSoft: 'FFF0F7F1', greenTotal: 'FFE8F5E9', grayBorder: 'FFCCCCCC',
+      text: 'FF222222', muted: 'FF888888',
+    };
+    const thin = { style: 'thin', color: { argb: C.grayBorder } };
+    const allBorders = { top: thin, bottom: thin, left: thin, right: thin };
 
-    // Tabla
-    data.push([
-      { v: 'INSUMO', s: this.sTableHeader() },
-      { v: 'kg/ha', s: this.sTableHeader() },
-      { v: 'kg TOTALES', s: this.sTableHeader() },
-      { v: 'SACOS', s: this.sTableHeader() },
-      { v: 'COSTO', s: this.sTableHeader() },
-    ]);
-    items.forEach((it, i) => {
-      const s = i % 2 ? this.sAltCell() : this.sCell();
-      const sm = i % 2 ? this.sAltMoney() : this.sMoney();
-      data.push([
-        { v: it.label, s },
-        { v: fmt(it.kgNut || it.kgP || it.kgSFT || it.dosis || 0, 1), s: { ...s, alignment: { horizontal: 'right' } } },
-        { v: fmt(it.kgTot || it.kg || 0, 1), s: { ...s, alignment: { horizontal: 'right' } } },
-        { v: fmt(it.sacos, 0), s: { ...s, alignment: { horizontal: 'right' } } },
-        { v: it.costo, s: sm },
-      ]);
+    // ============ HOJA 1: RESUMEN ============
+    const ws = wb.addWorksheet('Resumen', {
+      properties: { tabColor: { argb: C.accent } },
+      views: [{ showGridLines: false }],
     });
-    data.push([
-      { v: 'TOTAL', s: this.sTotal() },
-      { v: '', s: this.sTotal() },
-      { v: '', s: this.sTotal() },
-      { v: calc.total.sacos, s: { ...this.sTotal(), alignment: { horizontal: 'right' } } },
-      { v: calc.total.costo, s: { ...this.sTotal(), alignment: { horizontal: 'right' } } },
-    ]);
-    data.push([]);
+    ws.columns = [
+      { width: 30 }, { width: 14 }, { width: 16 }, { width: 10 }, { width: 16 },
+    ];
+
+    // Título
+    ws.mergeCells('A1:E1');
+    const t1 = ws.getCell('A1');
+    t1.value = 'FertiCalc · Agrologic';
+    t1.font = { bold: true, size: 20, color: { argb: C.accent } };
+    ws.getRow(1).height = 30;
+
+    ws.mergeCells('A2:E2');
+    const t2 = ws.getCell('A2');
+    t2.value = 'Plan de Fertilización';
+    t2.font = { bold: true, size: 13, color: { argb: C.accent } };
+
+    ws.mergeCells('A3:E3');
+    const t3 = ws.getCell('A3');
+    t3.value = `Generado: ${date}`;
+    t3.font = { italic: true, size: 10, color: { argb: C.muted } };
+
+    // Ficha de datos
+    let row = 5;
+    const ficha = [
+      ['CULTIVO', cropName],
+      ['SUPERFICIE', `${fmt(state.superficie,1)} ha`],
+      ['SUELO', soil ? soil.name : '—'],
+      ['NPK REQUERIDO', `${fmt(state.npk.n,0)} / ${fmt(state.npk.p,0)} / ${fmt(state.npk.k,0)} u/ha`],
+    ];
+    if (state.npk.cover) ficha.push(['COBERTERA', `${fmt(state.npk.cover,0)} u N`]);
+    ficha.forEach(([k, v]) => {
+      const cA = ws.getCell(`A${row}`); cA.value = k;
+      cA.font = { bold: true, size: 11, color: { argb: C.white } };
+      cA.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.accent } };
+      cA.alignment = { horizontal: 'left', vertical: 'middle' };
+      cA.border = allBorders;
+      ws.mergeCells(`B${row}:E${row}`);
+      const cB = ws.getCell(`B${row}`); cB.value = v;
+      cB.font = { size: 11, color: { argb: C.text } };
+      cB.border = allBorders;
+      ws.getRow(row).height = 20;
+      row++;
+    });
+
+    // Tabla de insumos
+    row += 1;
+    const headers = ['INSUMO', 'kg/ha', 'kg TOTALES', 'SACOS', 'COSTO'];
+    headers.forEach((h, i) => {
+      const cell = ws.getCell(row, i + 1);
+      cell.value = h;
+      cell.font = { bold: true, size: 10, color: { argb: C.white } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.accentDark } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = allBorders;
+    });
+    ws.getRow(row).height = 22;
+    row++;
+
+    // Filas de insumos
+    items.forEach((it, i) => {
+      const isAlt = i % 2 === 1;
+      const fill = isAlt ? C.greenSoft : C.white;
+      const vals = [
+        it.label,
+        +fmt(it.kgNut || it.kgP || it.kgSFT || it.dosis || 0, 1),
+        +fmt(it.kgTot || it.kg || 0, 1),
+        +fmt(it.sacos, 0),
+        Math.round(it.costo),
+      ];
+      vals.forEach((v, col) => {
+        const cell = ws.getCell(row, col + 1);
+        cell.value = v;
+        cell.font = { size: 10, color: { argb: C.text } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
+        cell.border = allBorders;
+        if (col >= 1) cell.alignment = { horizontal: 'right' };
+        if (col === 4) cell.numFmt = '"$"#,##0';
+      });
+      row++;
+    });
+
+    // Fila TOTAL
+    ['TOTAL', '', '', calc.total.sacos, calc.total.costo].forEach((v, col) => {
+      const cell = ws.getCell(row, col + 1);
+      cell.value = v;
+      cell.font = { bold: true, size: 11, color: { argb: C.text } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.greenTotal } };
+      cell.border = allBorders;
+      if (col >= 3) cell.alignment = { horizontal: 'right' };
+      if (col === 4) cell.numFmt = '"$"#,##0';
+    });
+    row += 2;
+
+    // Análisis económico
     if (calc.economic && calc.economic.porUnidad != null) {
-      data.push([{ v: calc.economic.label.toUpperCase(), s: this.sHeader() }, { v: Math.round(calc.economic.porUnidad), s: this.sMoney() }]);
+      const cA = ws.getCell(`A${row}`); cA.value = calc.economic.label.toUpperCase();
+      cA.font = { bold: true, size: 11, color: { argb: C.white } };
+      cA.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.accent } };
+      cA.border = allBorders;
+      ws.mergeCells(`B${row}:E${row}`);
+      const cB = ws.getCell(`B${row}`); cB.value = Math.round(calc.economic.porUnidad);
+      cB.font = { bold: true, size: 12, color: { argb: C.accent } };
+      cB.numFmt = '"$"#,##0'; cB.border = allBorders; cB.alignment = { horizontal: 'right' };
+      row += 2;
     }
 
-    const ws = XLSX.utils.aoa_to_sheet(data.map(row => row.map(cell => cell && cell.v !== undefined ? cell : '')));
-    // Aplicar estilos (SheetJS community soporta .s con xlsx-style; acó usamos formato base)
-    ws['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 16 }, { wch: 10 }, { wch: 16 }];
-    ws['!rows'] = [{ hpt: 28 }, { hpt: 22 }];
-    XLSX.utils.book_append_sheet(wb, ws, 'Resumen');
+    // Disclaimer
+    ws.mergeCells(`A${row}:E${row}`);
+    const disc = ws.getCell(`A${row}`);
+    disc.value = '⚠️ Herramienta de apoyo educativo. No sustituye la asesoría profesional agrícola. · Prof. Pedro Moll Medina · Instituto Adolfo Matthei';
+    disc.font = { italic: true, size: 9, color: { argb: C.muted } };
+    disc.alignment = { wrapText: true };
 
-    // Hoja 2: Paso a paso
-    const stepsData = [[{ v: 'DETALLE PASO A PASO', s: this.sTitle() }], []];
-    const addSteps = (r) => {
-      if (!r || !r.ok) return;
-      stepsData.push([{ v: r.label, s: this.sSub() }]);
-      r.steps.forEach((s) => {
+    // ============ HOJA 2: DETALLE PASO A PASO ============
+    const ws2 = wb.addWorksheet('Detalle', {
+      properties: { tabColor: { argb: C.accentDark } },
+      views: [{ showGridLines: false }],
+    });
+    ws2.columns = [{ width: 75 }];
+    ws2.mergeCells('A1:A1');
+    const dt = ws2.getCell('A1');
+    dt.value = 'DETALLE PASO A PASO';
+    dt.font = { bold: true, size: 16, color: { argb: C.accent } };
+    ws2.getRow(1).height = 26;
+
+    let r2 = 3;
+    const addSteps = (calcResult) => {
+      if (!calcResult || !calcResult.ok) return;
+      const h = ws2.getCell(`A${r2}`);
+      h.value = calcResult.label;
+      h.font = { bold: true, size: 12, color: { argb: C.accent } };
+      ws2.getRow(r2).height = 20;
+      r2++;
+      calcResult.steps.forEach((s) => {
         const real = s.real !== null && s.real !== undefined ? fmt(s.real, (String(s.real).includes('.') ? 1 : 0)) : '';
         const arr = s.rounded !== null && s.rounded !== undefined ? ` → ${fmt(s.rounded, 0)} ${s.unit || ''}` : ` ${s.unit || ''}`;
-        stepsData.push([{ v: `${s.text} = ${real}${arr}`, s: this.sCell() }]);
+        const c = ws2.getCell(`A${r2}`);
+        c.value = `${s.text} = ${real}${arr}`;
+        c.font = { name: 'Consolas', size: 10, color: { argb: C.text } };
+        r2++;
       });
-      stepsData.push([]);
+      r2++;
     };
     addSteps(calc.ph); addSteps(calc.pSuelo);
     calc.npk.forEach(addSteps); calc.micros.forEach(addSteps);
-    const ws2 = XLSX.utils.aoa_to_sheet(stepsData.map(row => row.map(cell => cell && cell.v !== undefined ? cell : '')));
-    ws2['!cols'] = [{ wch: 70 }];
-    XLSX.utils.book_append_sheet(wb, ws2, 'Detalle');
 
-    XLSX.writeFile(wb, this.fileName(state, 'xlsx'));
+    // Generar y descargar
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = this.fileName(state, 'xlsx');
+    a.click(); URL.revokeObjectURL(url);
     App.toast('📊 Excel descargado');
   },
-
-  /* ---- Estilos para Excel ---- */
-  sTitle()    { return { font: { bold: true, sz: 18, color: { rgb: '248A3D' } } }; },
-  sSub()      { return { font: { bold: true, sz: 13, color: { rgb: '248A3D' } } }; },
-  sMuted()    { return { font: { italic: true, sz: 10, color: { rgb: '888888' } } }; },
-  sHeader()   { return { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '248A3D' } }, alignment: { horizontal: 'left' }, border: this.bdr() }; },
-  sTableHeader() { return { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1C6E30' } }, alignment: { horizontal: 'center' }, border: this.bdr() }; },
-  sCell()     { return { font: { sz: 10 }, border: this.bdr() }; },
-  sAltCell()  { return { font: { sz: 10 }, fill: { fgColor: { rgb: 'F0F7F1' } }, border: this.bdr() }; },
-  sMoney()    { return { font: { sz: 10 }, numFmt: '"$"#,##0', border: this.bdr(), alignment: { horizontal: 'right' } }; },
-  sAltMoney() { return { font: { sz: 10 }, numFmt: '"$"#,##0', fill: { fgColor: { rgb: 'F0F7F1' } }, border: this.bdr(), alignment: { horizontal: 'right' } }; },
-  sTotal()    { return { font: { bold: true, sz: 11 }, fill: { fgColor: { rgb: 'E8F5E9' } }, border: this.bdr() }; },
-  bdr()       { return { top: { style: 'thin', color: { rgb: 'CCCCCC' } }, bottom: { style: 'thin', color: { rgb: 'CCCCCC' } }, left: { style: 'thin', color: { rgb: 'CCCCCC' } }, right: { style: 'thin', color: { rgb: 'CCCCCC' } } }; },
 
   /* ============================================================
    * IMAGEN (captura del resumen)
