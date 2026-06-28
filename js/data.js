@@ -79,8 +79,20 @@ const CROPS = [
   { id: 'pradera',    name: 'Pradera',     npk: { n: 120, p: 90,  k: 90  }, cover: 0,  yield: { type: 'ms',  value: 9000 } },
   { id: 'silo_maiz',  name: 'Silo Maíz',   npk: { n: 150, p: 100, k: 150 }, cover: 0,  yield: { type: 'ton', value: 50 } },
   { id: 'papa',       name: 'Papa',        npk: { n: 130, p: 150, k: 160 }, cover: 0,  yield: { type: 'qq',  value: 500 } },
+  // Cultivos hortícolas por planta/paquete (con pérdida poblacional típica)
+  { id: 'betarraga',  name: 'Betarraga',   npk: { n: 143, p: 165, k: 115 }, cover: 0,  yield: { type: 'paquete', value: 105000 }, unitsPerPackage: 5, perdida: 22, planted: 105000 },
   { id: 'custom',     name: 'Personalizado', npk: { n: 0, p: 0, k: 0 }, cover: 0,  yield: { type: 'qq', value: 0 } },
 ];
+
+/**
+ * Busca un fertilizante por id O por nombre (la guía antigua guardaba el nombre).
+ * Devuelve el objeto o undefined. Robusto frente a estados guardados antiguos.
+ */
+function findFert(key) {
+  if (!key) return undefined;
+  const k = String(key).trim().toLowerCase();
+  return FERTILIZERS.find((f) => f.id === key || f.name.toLowerCase() === k);
+}
 
 /** Unidades de cosecha soportadas en el análisis económico. */
 const YIELD_TYPES = {
@@ -105,3 +117,4 @@ window.CROPS = CROPS;
 window.YIELD_TYPES = YIELD_TYPES;
 window.SACO_KG = SACO_KG;
 window.SACOS_POR_TON = SACOS_POR_TON;
+window.findFert = findFert;

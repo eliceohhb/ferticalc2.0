@@ -39,6 +39,12 @@ function fmtMoney(n) {
   return '$' + fmt(Math.round(n), 0);
 }
 
+/** Formatea moneda en pesos con decimales (para costo por unidad/paquete). */
+function fmtMoneyDec(n, dec = 2) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return '$' + fmt(n, dec);
+}
+
 /* ============================================================
  * PROCESO NPK (5 pasos)
  * Aplica a N base, cobertera, P y K.
@@ -320,32 +326,82 @@ function calcMicro({ label, dosis, sup, precioTon }) {
 
 /* ============================================================
  * Análisis económico por unidad de cosecha
+ * Para cultivos por planta/paquete aplica pérdida poblacional.
+ * Si la unidad es "paquete", además calcula costo por paquete
+ * según las unidades (plantas) por paquete definidas.
+ * Devuelve un arreglo `steps` con el desglose paso a paso.
  * ============================================================ */
-function calcEconomic({ costoTotal, unitsPlanted, perdida, yieldType, yieldValue, sup }) {
-  const out = { costoTotal, porUnidad: null, unidadesVendidas: null, label: '' };
+function calcEconomic({ costoTotal, unitsPlanted, perdida, yieldType, yieldValue, sup, unitsPerPackage = 1 }) {
+  const out = {
+    costoTotal,
+    porUnidad: null,
+    porPaquete: null,
+    unidadesVendidas: null,
+    paquetes: null,
+    perdida: null,
+    label: '',
+    steps: [],
+  };
 
-  // Unidades (plantas): aplica pérdida poblacional
+  // Unidades (plantas) o Paquetes: base poblacional con pérdida
   if (yieldType === 'unidad' || yieldType === 'paquete') {
-    if (unitsPlanted) {
-      out.unidadesVendidas = unitsPlanted * (1 - (perdida || 0) / 100);
-      out.porUnidad = out.unidadesVendidas ? costoTotal / out.unidadesVendidas : null;
+    const planted = +unitsPlanted || 0;
+    if (!planted) {
       out.label = `Costo por ${YIELD_TYPES[yieldType].unit}`;
+      return out;
     }
-  } else if (yieldType === 'qq') {
-    const qq = (yieldValue || 0) * sup;
-    out.unidadesVendidas = qq;
-    out.porUnidad = qq ? costoTotal / qq : null;
+    const perdidaPct = +perdida || 0;
+    const totalPlantas = planted * (sup || 1);
+    const perdidaUnidades = totalPlantas * (perdidaPct / 100);
+    const vendidas = totalPlantas - perdidaUnidades;
+    out.unidadesVendidas = vendidas;
+    out.perdida = perdidaUnidades;
+    out.porUnidad = vendidas ? costoTotal / vendidas : null;
+
+    if (yieldType === 'paquete') {
+      const udsPorPaq = Math.max(1, +unitsPerPackage || 1);
+      const paquetes = Math.floor(vendidas / udsPorPaq);
+      out.paquetes = paquetes;
+      out.porPaquete = paquetes ? costoTotal / paquetes : null;
+      out.label = 'Costo por paquete';
+      out.steps = [
+        { text: `Total plantas: ${fmt(planted, 0)} × ${fmt(sup || 1, 2)} ha = ${fmt(totalPlantas, 0)}`, unit: 'plantas' },
+        { text: `Pérdida ${fmt(perdidaPct, 1)}% → ${fmt(perdidaUnidades, 0)} plantas no vendidas`, unit: 'plantas' },
+        { text: `Plantas vendidas: ${fmt(totalPlantas, 0)} − ${fmt(perdidaUnidades, 0)} = ${fmt(vendidas, 0)}`, unit: 'plantas' },
+        { text: `Paquetes (${udsPorPaq} uds): ${fmt(vendidas, 0)} ÷ ${udsPorPaq} = ${fmt(paquetes, 0)}`, unit: 'paquetes' },
+        { text: `Costo por paquete: ${fmtMoney(costoTotal)} ÷ ${fmt(paquetes, 0)} = ${fmtMoneyDec(out.porPaquete, 2)}`, unit: 'costo/paquete' },
+      ];
+    } else {
+      out.label = 'Costo por planta (unidad)';
+      out.steps = [
+        { text: `Total plantas: ${fmt(planted, 0)} × ${fmt(sup || 1, 2)} ha = ${fmt(totalPlantas, 0)}`, unit: 'plantas' },
+        { text: `Pérdida ${fmt(perdidaPct, 1)}% → ${fmt(perdidaUnidades, 0)} plantas no vendidas`, unit: 'plantas' },
+        { text: `Plantas vendidas: ${fmt(vendidas, 0)}`, unit: 'plantas' },
+        { text: `Costo por planta: ${fmtMoney(costoTotal)} ÷ ${fmt(vendidas, 0)} = ${fmtMoneyDec(out.porUnidad, 2)}`, unit: 'costo/planta' },
+      ];
+    }
+    return out;
+  }
+
+  // Cosechas por superficie (qq / ton / kg MS)
+  let vendidas = 0;
+  if (yieldType === 'qq') {
+    vendidas = (yieldValue || 0) * sup;
     out.label = 'Costo por quintal (qq)';
   } else if (yieldType === 'ton') {
-    const ton = ((yieldValue || 0) * sup * 1000) / 1000; // kg cosechados / 1000
-    out.unidadesVendidas = (yieldValue || 0) * sup;
-    out.porUnidad = out.unidadesVendidas ? costoTotal / out.unidadesVendidas : null;
+    vendidas = (yieldValue || 0) * sup;
     out.label = 'Costo por tonelada';
   } else if (yieldType === 'ms') {
-    const kgMs = (yieldValue || 0) * sup;
-    out.unidadesVendidas = kgMs;
-    out.porUnidad = kgMs ? costoTotal / kgMs : null;
+    vendidas = (yieldValue || 0) * sup;
     out.label = 'Costo por kg Materia Seca';
+  }
+  out.unidadesVendidas = vendidas;
+  out.porUnidad = vendidas ? costoTotal / vendidas : null;
+  if (vendidas) {
+    out.steps = [
+      { text: `Producción: ${fmt(yieldValue || 0, 1)} × ${fmt(sup, 2)} ha = ${fmt(vendidas, 1)}`, unit: YIELD_TYPES[yieldType] ? YIELD_TYPES[yieldType].unit : '' },
+      { text: `Costo por ${YIELD_TYPES[yieldType] ? YIELD_TYPES[yieldType].unit : 'unidad'}: ${fmtMoney(costoTotal)} ÷ ${fmt(vendidas, 1)} = ${fmtMoneyDec(out.porUnidad, 2)}`, unit: 'costo/unidad' },
+    ];
   }
   return out;
 }
@@ -397,7 +453,7 @@ function calcPlan(state) {
 
   // N base
   if (npk.n) {
-    const fert = FERTILIZERS.find((f) => f.id === state.nFert);
+    const fert = findFert(state.nFert);
     const r = calcNPK({
       label: 'Nitrógeno base',
       nutrient: 'N',
@@ -416,7 +472,7 @@ function calcPlan(state) {
 
   // Cobertera (N adicional, NO se resta del N base)
   if (npk.cover) {
-    const fert = FERTILIZERS.find((f) => f.id === state.coverFert);
+    const fert = findFert(state.coverFert);
     const r = calcNPK({
       label: 'Cobertera (N adicional)',
       nutrient: 'N',
@@ -436,7 +492,7 @@ function calcPlan(state) {
 
   // P
   if (npk.p) {
-    const fert = FERTILIZERS.find((f) => f.id === state.pFert);
+    const fert = findFert(state.pFert);
     const r = calcNPK({
       label: 'Fósforo (P₂O₅)',
       nutrient: 'P',
@@ -455,7 +511,7 @@ function calcPlan(state) {
 
   // K
   if (npk.k) {
-    const fert = FERTILIZERS.find((f) => f.id === state.kFert);
+    const fert = findFert(state.kFert);
     const r = calcNPK({
       label: 'Potasio (K₂O)',
       nutrient: 'K',
@@ -500,6 +556,7 @@ function calcPlan(state) {
     yieldType: state.yieldType || 'qq',
     yieldValue: +state.yieldValue || 0,
     sup,
+    unitsPerPackage: +state.unitsPerPackage || 1,
   });
 
   return out;
@@ -511,6 +568,7 @@ window.roundDec = roundDec;
 window.ceilRound = ceilRound;
 window.fmt = fmt;
 window.fmtMoney = fmtMoney;
+window.fmtMoneyDec = fmtMoneyDec;
 window.calcPH = calcPH;
 window.calcPSuelo = calcPSuelo;
 window.calcNPK = calcNPK;

@@ -152,6 +152,11 @@
             <input type="number" id="perdida" class="input" placeholder="10" min="0" max="100" step="0.1" />
           </label>
         </div>
+        <label class="field collapse" id="paqueteGroup">
+          <span class="field__label">Unidades por paquete (plantas que arman 1 paquete)</span>
+          <input type="number" id="unitsPerPackage" class="input" placeholder="5" min="1" step="1" value="5" />
+          <span class="field__label" style="margin-top:6px; font-size:12px;">Ej. betarraga: 5 plantas = 1 paquete.</span>
+        </label>
       </div>
     </section>
 
@@ -247,7 +252,7 @@
         <div class="grid-2">
           <label class="field">
             <span class="field__label">Fertilizante</span>
-            <select id="nFert" class="select fert-select" data-nutrient="n"></select>
+            <input type="text" id="nFert" class="input fert-search" list="fertList" data-nutrient="n" placeholder="Buscar fertilizante…" autocomplete="off" />
           </label>
           <label class="field">
             <span class="field__label">% N</span>
@@ -266,7 +271,7 @@
         <div class="grid-2">
           <label class="field">
             <span class="field__label">Fertilizante</span>
-            <select id="coverFert" class="select fert-select" data-nutrient="n"></select>
+            <input type="text" id="coverFert" class="input fert-search" list="fertList" data-nutrient="n" placeholder="Buscar fertilizante…" autocomplete="off" />
           </label>
           <label class="field">
             <span class="field__label">% N</span>
@@ -285,7 +290,7 @@
         <div class="grid-2">
           <label class="field">
             <span class="field__label">Fertilizante</span>
-            <select id="pFert" class="select fert-select" data-nutrient="p"></select>
+            <input type="text" id="pFert" class="input fert-search" list="fertList" data-nutrient="p" placeholder="Buscar fertilizante…" autocomplete="off" />
           </label>
           <label class="field">
             <span class="field__label">% P₂O₅</span>
@@ -304,7 +309,7 @@
         <div class="grid-2">
           <label class="field">
             <span class="field__label">Fertilizante</span>
-            <select id="kFert" class="select fert-select" data-nutrient="k"></select>
+            <input type="text" id="kFert" class="input fert-search" list="fertList" data-nutrient="k" placeholder="Buscar fertilizante…" autocomplete="off" />
           </label>
           <label class="field">
             <span class="field__label">% K₂O</span>
@@ -372,6 +377,9 @@
     <span class="nav-label" id="navLabel">Paso 1 de 6</span>
     <button class="btn btn--primary nav-btn" id="nextBtn">Siguiente ›</button>
   </nav>
+
+  <!-- Datalist compartido para el buscador de fertilizantes -->
+  <datalist id="fertList"></datalist>
 
   <!-- ===== Scripts ===== -->
   <script src="js/data.js"></script>

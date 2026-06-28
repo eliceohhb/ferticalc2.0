@@ -104,10 +104,20 @@ const Export = {
     if (calc.economic && calc.economic.porUnidad != null) {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
       doc.setTextColor(36, 138, 61);
-      doc.text('📊 Análisis Económico', 40, y); y += 18;
+      doc.text('Análisis Económico', 40, y); y += 18;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
       doc.setTextColor(40, 40, 40);
-      doc.text(`${calc.economic.label}: ${fmtMoney(calc.economic.porUnidad)}`, 40, y); y += 24;
+      // Desglose paso a paso
+      if (calc.economic.steps && calc.economic.steps.length) {
+        calc.economic.steps.forEach((s) => {
+          if (y > H - 60) { doc.addPage(); y = 50; }
+          doc.setFont('courier', 'normal'); doc.setFontSize(10);
+          doc.text(`${s.text}  ${s.unit || ''}`, 44, y); y += 14;
+        });
+        y += 4;
+      } else {
+        doc.text(`${calc.economic.label}: ${fmtMoney(calc.economic.porUnidad)}`, 40, y); y += 24;
+      }
     }
 
     // ---- Paso a paso ----
@@ -191,7 +201,17 @@ const Export = {
       </tr>`).join('');
 
     const ecoHtml = (calc.economic && calc.economic.porUnidad != null)
-      ? `<p style="font-size:12pt;margin:12pt 0 4pt"><b style="color:#248A3D">${calc.economic.label}:</b> ${fmtMoney(calc.economic.porUnidad)}</p>` : '';
+      ? (() => {
+          let h = `<h3 style="color:#248A3D;margin:12pt 0 4pt">Análisis Económico</h3>`;
+          if (calc.economic.steps && calc.economic.steps.length) {
+            h += calc.economic.steps.map((s) =>
+              `<p style="font-family:Consolas,monospace;margin:2pt 0 2pt 18pt;font-size:10pt">${s.text} <i>${s.unit || ''}</i></p>`
+            ).join('');
+          } else {
+            h += `<p style="font-size:11pt"><b>${calc.economic.label}:</b> ${fmtMoney(calc.economic.porUnidad)}</p>`;
+          }
+          return h;
+        })() : '';
 
     const html = `<!DOCTYPE html>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
@@ -363,17 +383,29 @@ Aplicación de cálculo de fertilización agrícola · Eliceo Hernández</div>
     });
     row += 2;
 
-    // Análisis económico
+    // Análisis económico (con desglose paso a paso)
     if (calc.economic && calc.economic.porUnidad != null) {
       const cA = ws.getCell(`A${row}`); cA.value = calc.economic.label.toUpperCase();
-      cA.font = { bold: true, size: 11, color: { argb: C.white } };
+      cA.font = { bold: true, size: 11, color: { argb: C.accent } };
       cA.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C.accent } };
       cA.border = allBorders;
+      const mainVal = calc.economic.porPaquete != null ? calc.economic.porPaquete : calc.economic.porUnidad;
       ws.mergeCells(`B${row}:E${row}`);
-      const cB = ws.getCell(`B${row}`); cB.value = Math.round(calc.economic.porUnidad);
+      const cB = ws.getCell(`B${row}`); cB.value = Math.round(mainVal * 100) / 100;
       cB.font = { bold: true, size: 12, color: { argb: C.accent } };
       cB.numFmt = '"$"#,##0'; cB.border = allBorders; cB.alignment = { horizontal: 'right' };
       row += 2;
+      // Desglose paso a paso en filas
+      if (calc.economic.steps && calc.economic.steps.length) {
+        calc.economic.steps.forEach((s) => {
+          ws.mergeCells(`A${row}:E${row}`);
+          const c = ws.getCell(`A${row}`);
+          c.value = `${s.text}  ${s.unit || ''}`;
+          c.font = { name: 'Consolas', size: 10, color: { argb: C.text } };
+          row++;
+        });
+        row += 1;
+      }
     }
 
     // Disclaimer

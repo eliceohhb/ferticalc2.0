@@ -349,6 +349,14 @@ body {
   background: var(--warning); color: #fff; margin-left: 4px;
   font-family: 'Inter', sans-serif;
 }
+.step-line--highlight {
+  color: var(--text);
+  font-weight: 700;
+  background: var(--accent-soft);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  margin-top: 2px;
+}
 
 .summary-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .summary-table th {

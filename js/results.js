@@ -63,10 +63,29 @@ const Results = {
     // --- Análisis económico ---
     let ecoHtml = '';
     if (calc.economic && calc.economic.porUnidad != null) {
+      const eco = calc.economic;
+      // Métrica principal
+      const mainVal = eco.porPaquete != null ? eco.porPaquete : eco.porUnidad;
       ecoHtml = `
-        <div class="metric"><div class="metric__value">${fmtMoney(calc.economic.porUnidad)}</div><div class="metric__label">${calc.economic.label}</div></div>`;
+        <div class="metric"><div class="metric__value">${fmtMoneyDec(mainVal, 2)}</div><div class="metric__label">${eco.label}</div></div>`;
     }
     const ecoBlock = ecoHtml ? `<div class="metrics">${ecoHtml}</div>` : '';
+
+    // --- Desglose económico paso a paso ---
+    let ecoDetailHtml = '';
+    if (calc.economic && calc.economic.steps && calc.economic.steps.length) {
+      const stepLines = calc.economic.steps.map((s, i) => {
+        const isLast = i === calc.economic.steps.length - 1;
+        return `<div class="step-line${isLast ? ' step-line--highlight' : ''}">${s.text} <span style="opacity:.6">${s.unit || ''}</span></div>`;
+      }).join('');
+      ecoDetailHtml = `
+        <div class="detail-block">
+          <div class="detail-block__head">
+            <span class="detail-block__title">💰 Economía por cosecha</span>
+          </div>
+          ${stepLines}
+        </div>`;
+    }
 
     // --- Paso a paso ---
     let details = '';
@@ -117,7 +136,7 @@ const Results = {
         <button class="btn btn--ghost" id="savePlan">💾 Guardar</button>
       </div>`;
 
-    container.innerHTML = metrics + ecoBlock + table + `<h3 class="card__title" style="margin:8px 4px">📝 Paso a paso</h3>` + details + chartsHtml + recHtml + exportBar;
+    container.innerHTML = metrics + ecoBlock + table + ecoDetailHtml + `<h3 class="card__title" style="margin:8px 4px">📝 Paso a paso</h3>` + details + chartsHtml + recHtml + exportBar;
 
     // --- Renderizar gráficos ---
     const items = [];

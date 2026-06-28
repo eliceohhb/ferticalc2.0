@@ -36,6 +36,7 @@ const App = {
       yieldValue: n('yieldValue'),
       unitsPlanted: n('unitsPlanted'),
       perdida: n('perdida'),
+      unitsPerPackage: n('unitsPerPackage'),
       // Correcciones
       usePH: b('usePH'),
       phIni: v('phIni') === '' ? null : +v('phIni'),
@@ -77,6 +78,7 @@ const App = {
     set('reqN', npk.n); set('reqP', npk.p); set('reqK', npk.k); set('reqCover', npk.cover);
     set('yieldType', s.yieldType); set('yieldValue', s.yieldValue);
     set('unitsPlanted', s.unitsPlanted); set('perdida', s.perdida);
+    set('unitsPerPackage', s.unitsPerPackage);
     check('usePH', s.usePH); if (s.usePH) document.getElementById('phGroup').classList.add('open');
     set('phIni', s.phIni); set('phDes', s.phDes); set('phPrecio', s.phPrecio);
     check('usePSuelo', s.usePSuelo); if (s.usePSuelo) document.getElementById('pSueloGroup').classList.add('open');
@@ -91,8 +93,9 @@ const App = {
       s.micros.forEach((m) => { if (m.dosis || m.precio) UI.addMicroRow(m); });
     }
     if (!document.querySelector('.micro-row')) UI.addMicroRow();
-    // Estado colapsable poblacional
+    // Estado colapsable poblacional / paquete
     if (['unidad','paquete'].includes(s.yieldType)) document.getElementById('poblacionalGroup').classList.add('open');
+    if (s.yieldType === 'paquete') document.getElementById('paqueteGroup').classList.add('open');
     // Info Ca
     const soil = SOILS.find((x) => x.id === s.soil);
     if (soil) document.getElementById('phCaInfo').textContent = `Suelo ${soil.name}: Calcio ${soil.ca} · Tampón ${soil.buffer || '—'}`;

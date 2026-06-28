@@ -23,36 +23,38 @@ const UI = {
       soilSel.appendChild(opt);
     });
 
-    // Selectores de fertilizantes (por nutriente)
-    // Mostrar TODOS los fertilizantes con sus % reales, ordenados por relevancia
-    document.querySelectorAll('.fert-select').forEach((sel) => {
-      const nutrient = sel.dataset.nutrient;
-      sel.appendChild(new Option('— Personalizado —', ''));
-      // Ordenar: primero los que tienen más del nutriente solicitado
-      const sorted = [...FERTILIZERS].sort((a, b) => (b[nutrient] || 0) - (a[nutrient] || 0));
-      sorted.forEach((f) => {
-        const val = f[nutrient] || 0;
-        // Etiqueta con el % principal y los nutrientes secundarios
-        let label = `${f.name} (${val}%)`;
-        sel.appendChild(new Option(label, f.id));
+    // Datalist compartido del buscador de fertilizantes
+    const dl = document.getElementById('fertList');
+    if (dl) {
+      dl.innerHTML = '';
+      FERTILIZERS.forEach((f) => {
+        const opt = document.createElement('option');
+        opt.value = f.name;
+        // Atributo data ayuda a algunos navegadores a mostrar el %
+        opt.label = `${f.name}`;
+        dl.appendChild(opt);
       });
-    });
+    }
   },
 
-  /* Al elegir un fertilizante, autocompletar el % */
+  /* Buscador con datalist: al escribir/confirmar un nombre válido,
+     autocompleta el % del nutriente correspondiente. */
   initFertAutoFill() {
-    document.querySelectorAll('.fert-select').forEach((sel) => {
-      sel.addEventListener('change', () => {
-        const nutrient = sel.dataset.nutrient;
-        const fert = FERTILIZERS.find((f) => f.id === sel.value);
-        // El input de % hermano está en la misma card
-        const card = sel.closest('.card');
-        const pctInput = card.querySelector('.fert-pct');
+    document.querySelectorAll('.fert-search').forEach((input) => {
+      const applyMatch = () => {
+        const nutrient = input.dataset.nutrient;
+        const fert = findFert(input.value);
+        const card = input.closest('.card');
+        const pctInput = card ? card.querySelector('.fert-pct') : null;
         if (fert && pctInput) {
           pctInput.value = fert[nutrient];
           pctInput.dispatchEvent(new Event('input'));
         }
-      });
+      };
+      // 'input' cubre escribir y elegir del datalist en la mayoría de navegadores;
+      // 'change' asegura el match al salir del campo (algunos browsers).
+      input.addEventListener('input', applyMatch);
+      input.addEventListener('change', applyMatch);
     });
   },
 
@@ -94,9 +96,12 @@ const UI = {
     // Campos poblacionales (solo unidad/paquete)
     const yieldType = document.getElementById('yieldType');
     const popGroup = document.getElementById('poblacionalGroup');
+    const paqGroup = document.getElementById('paqueteGroup');
     const updatePop = () => {
       const show = ['unidad', 'paquete'].includes(yieldType.value);
       popGroup.classList.toggle('open', show);
+      // Campo "unidades por paquete" solo si la cosecha es "paquete"
+      if (paqGroup) paqGroup.classList.toggle('open', yieldType.value === 'paquete');
     };
     yieldType.addEventListener('change', updatePop);
     updatePop();
@@ -119,6 +124,10 @@ const UI = {
       set('reqCover', crop.cover);
       set('yieldType', crop.yield.type);
       set('yieldValue', crop.yield.value);
+      // Campos poblacionales (cultivos hortícolas: betarraga, etc.)
+      if (crop.planted) set('unitsPlanted', crop.planted);
+      if (crop.perdida != null) set('perdida', crop.perdida);
+      if (crop.unitsPerPackage) set('unitsPerPackage', crop.unitsPerPackage);
       App.toast(`Cultivo "${crop.name}" cargado`);
     });
   },
