@@ -39,6 +39,7 @@
         </div>
       </div>
       <div class="app-header__actions">
+        <button class="icon-btn" id="aboutBtn" title="Quiénes somos" aria-label="Quiénes somos">ℹ️</button>
         <button class="icon-btn" id="paletteBtn" title="Colores" aria-label="Cambiar colores">🎨</button>
         <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">🌓</button>
         <button class="icon-btn" id="installBtn" title="Instalar app" aria-label="Instalar app" hidden>⬇️</button>
@@ -53,6 +54,11 @@
       <div class="palette-row" data-accent-val="terra"><div class="palette-swatch" style="background:linear-gradient(135deg,#E74C3C,#C0392B)"></div><span class="palette-name">🔴 Terracota</span><span class="palette-check">✓</span></div>
       <div class="palette-row" data-accent-val="blue"><div class="palette-swatch" style="background:linear-gradient(135deg,#32AEFF,#0A84FF)"></div><span class="palette-name">🔵 Azul océano</span><span class="palette-check">✓</span></div>
       <div class="palette-row" data-accent-val="cyan"><div class="palette-swatch" style="background:linear-gradient(135deg,#40E0D0,#00C7BE)"></div><span class="palette-name">🩵 Cian turquesa</span><span class="palette-check">✓</span></div>
+      <div class="palette-row" data-accent-val="orange"><div class="palette-swatch" style="background:linear-gradient(135deg,#FFB340,#FF9500)"></div><span class="palette-name">🧡 Naranja</span><span class="palette-check">✓</span></div>
+      <div class="palette-row" data-accent-val="pink"><div class="palette-swatch" style="background:linear-gradient(135deg,#FF6482,#FF2D55)"></div><span class="palette-name">🩷 Rosa</span><span class="palette-check">✓</span></div>
+      <div class="palette-row" data-accent-val="indigo"><div class="palette-swatch" style="background:linear-gradient(135deg,#7A78E0,#5856D6)"></div><span class="palette-name">🫐 Índigo</span><span class="palette-check">✓</span></div>
+      <div class="palette-row" data-accent-val="lime"><div class="palette-swatch" style="background:linear-gradient(135deg,#A3E635,#84CC16)"></div><span class="palette-name">🌿 Lima</span><span class="palette-check">✓</span></div>
+      <div class="palette-row" data-accent-val="sky"><div class="palette-swatch" style="background:linear-gradient(135deg,#38BDF8,#0EA5E9)"></div><span class="palette-name">🔵 Celeste</span><span class="palette-check">✓</span></div>
     </div>
 
     <!-- Barra de progreso -->
@@ -380,6 +386,109 @@
 
   <!-- Datalist compartido para el buscador de fertilizantes -->
   <datalist id="fertList"></datalist>
+
+  <!-- ===== QUIÉNES SOMOS ===== -->
+  <div class="about-overlay" id="aboutOverlay" hidden>
+    <div class="about-header">
+      <span class="about-header__title">🌱 FertiCalc</span>
+      <button class="about-close" id="aboutClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="about-content">
+
+      <!-- Hero con imagen de fondo -->
+      <div class="about-hero">
+        <div class="about-hero__bg">
+          <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&q=80" alt="Campo agrícola" class="about-hero__img" />
+          <div class="about-hero__img-overlay"></div>
+        </div>
+        <span class="about-hero__icon" style="position:relative;z-index:2;">🌾</span>
+        <div class="about-hero__name" style="position:relative;z-index:2;">FertiCalc</div>
+        <span class="about-hero__tag" style="position:relative;z-index:2;">Agrologic · v3.0</span>
+      </div>
+
+      <!-- Historia -->
+      <div class="about-mission about-story">
+        <div class="about-mission__title">📖 Nuestra historia</div>
+        <div class="about-mission__text">
+          <strong>Agrologic</strong> nació en el <strong>Instituto Profesional Agrario Adolfo Matthei</strong>, en La Unión, Región de Los Ríos, como un proyecto estudiantil con una meta clara: llevar la tecnología al campo chileno.<br><br>
+          En las aulas de la <strong>Cátedra de Suelos y Fertilizantes</strong>, el profesor <strong>Pedro Moll Medina</strong> nos enseñó que la fertilización no es guessing — es ciencia. Sus tablas, sus 5 pasos, su rigurosidad con los redondeos… todo tiene un porqué.<br><br>
+          Pero vimos un problema: muchos agricultores y técnicos de la zona siguen haciendo cálculos a mano, con papel y calculadora, comiendo errores que pueden costar miles de pesos por hectárea. En zonas rurales sin internet, las apps online no sirven.<br><br>
+          Así nació <strong>FertiCalc</strong>: una herramienta <strong>offline, gratuita y en español</strong>, que replica exactamente la metodología del profesor Moll Medina. No reinventamos la rueda — simplemente la pusimos al alcance de todos.<br><br>
+          Hoy FertiCalc es una <strong>Progressive Web App</strong> que funciona en cualquier celular, sin instalar nada, sin necesidad de conexión. Calcula planes completos de fertilización NPK, correcciones de pH y fósforo, análisis económico por unidad de cosecha, y exporta informes profesionales en PDF, Word y Excel.<br><br>
+          <em>Porque la agricultura de precisión no debería ser privilegio de unos pocos.</em>
+        </div>
+      </div>
+
+      <!-- Misión -->
+      <div class="about-mission">
+        <div class="about-mission__title">🎯 Nuestra misión</div>
+        <div class="about-mission__text">
+          Democratizar el acceso a la fertilización de precisión, llevando la metodología del <strong>profesor Pedro Moll Medina</strong> a cada técnico y agricultor, incluso en zonas sin internet. Queremos que el cálculo de fertilización sea <strong>rápido, confiable y educativo</strong>, reduciendo el margen de error humano y potenciando el rendimiento de los cultivos.
+        </div>
+      </div>
+
+      <!-- Valores -->
+      <div class="about-values">
+        <div class="about-value">
+          <span class="about-value__icon">📱</span>
+          <span class="about-value__label">Offline</span>
+        </div>
+        <div class="about-value">
+          <span class="about-value__icon">🧮</span>
+          <span class="about-value__label">Precisión académica</span>
+        </div>
+        <div class="about-value">
+          <span class="about-value__icon">🌽</span>
+          <span class="about-value__label">Todos los cultivos</span>
+        </div>
+        <div class="about-value">
+          <span class="about-value__icon">📊</span>
+          <span class="about-value__label">Análisis económico</span>
+        </div>
+      </div>
+
+      <!-- Características -->
+      <div class="about-mission">
+        <div class="about-mission__title">⚡ ¿Qué incluye?</div>
+        <div class="about-mission__text" style="margin-top:10px;">
+          ✅ Cálculo NPK con 5 pasos (método Prof. Moll Medina)<br>
+          ✅ Corrección de pH (CaCO₃) y Fósforo del suelo<br>
+          ✅ Micronutrientes adicionales<br>
+          ✅ 25 fertilizantes oficiales con buscador inteligente<br>
+          ✅ Análisis económico: costo por qq, ton, planta o paquete<br>
+          ✅ Exportación a PDF, Word, Excel e imagen<br>
+          ✅ 10 paletas de colores y modo oscuro<br>
+          ✅ Funciona sin internet (PWA)<br>
+          ✅ Historial de planes guardados<br>
+          ✅ Etiquetas imprimibles para sacos
+        </div>
+      </div>
+
+      <!-- Equipo -->
+      <div class="about-team">
+        <div class="about-team__title">👥 Equipo</div>
+        <div class="about-team__grid">
+          <div class="about-person">
+            <div class="about-person__avatar">👨‍🏫</div>
+            <div class="about-person__name">Prof. Pedro Moll Medina</div>
+            <div class="about-person__role">Metodología · Cátedra de Suelos y Fertilizantes</div>
+          </div>
+          <div class="about-person">
+            <div class="about-person__avatar">👨‍💻</div>
+            <div class="about-person__name">Eliceo Hernández</div>
+            <div class="about-person__role">Desarrollo · Agrologic</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="about-footer">
+        <p><strong>Instituto Profesional Agrario Adolfo Matthei</strong></p>
+        <p style="margin-top:4px;">Cátedra de Suelos y Fertilizantes · La Unión, Región de Los Ríos</p>
+        <p style="margin-top:8px; font-size:11px; opacity:0.6;">Hecho con 🌱 en Chile · Junio 2026</p>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== Scripts ===== -->
   <script src="js/data.js"></script>
