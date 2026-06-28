@@ -111,6 +111,20 @@ const App = {
       if (e.key === 'ArrowLeft') this.goToStep(this.currentStep - 1);
       if (e.key === 'ArrowRight') this.goToStep(this.currentStep + 1);
     });
+    // Swipe en celular (izq/der)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const main = document.getElementById('appMain');
+    main.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, { passive: true });
+    main.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      // Solo swipe horizontal (no scroll vertical)
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) this.goToStep(this.currentStep + 1);  // swipe izq → adelante
+        else this.goToStep(this.currentStep - 1);           // swipe der → atrás
+      }
+    }, { passive: true });
   },
 
   goToStep(step) {
@@ -167,7 +181,7 @@ const App = {
     Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === step));
   },
 
-  /* ---------- Header: tema + instalar PWA ---------- */
+  /* ---------- Header: tema + instalar PWA + Quiénes Somos ---------- */
   bindHeader() {
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -182,6 +196,21 @@ const App = {
         document.getElementById('installBtn').hidden = true;
       }
     });
+
+    // Quiénes Somos
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutOverlay = document.getElementById('aboutOverlay');
+    const aboutClose = document.getElementById('aboutClose');
+    if (aboutBtn && aboutOverlay && aboutClose) {
+      aboutBtn.addEventListener('click', () => {
+        aboutOverlay.hidden = false;
+        aboutOverlay.classList.remove('closing');
+      });
+      aboutClose.addEventListener('click', () => {
+        aboutOverlay.classList.add('closing');
+        setTimeout(() => { aboutOverlay.hidden = true; aboutOverlay.classList.remove('closing'); }, 300);
+      });
+    }
   },
 
   /* ---------- Guardar plan (modal) ---------- */

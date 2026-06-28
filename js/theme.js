@@ -78,7 +78,11 @@ const Theme = {
       row.classList.toggle('active', row.dataset.accentVal === accent);
     });
     // Actualizar meta theme-color
-    const colors = { green: '#248A3D', purple: '#AF52DE', terra: '#C0392B', blue: '#0A84FF', cyan: '#00C7BE' };
+    const colors = {
+      green: '#248A3D', purple: '#AF52DE', terra: '#C0392B', blue: '#0A84FF',
+      cyan: '#00C7BE', orange: '#FF9500', pink: '#FF2D55',
+      indigo: '#5856D6', lime: '#84CC16', sky: '#0EA5E9',
+    };
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', colors[accent] || '#248A3D');
     setTimeout(() => Charts.refresh(), 100);
