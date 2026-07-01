@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Estilos -->
-  <link rel="stylesheet" href="css/style.css?v=3.1" />
+  <link rel="stylesheet" href="css/style.css?v=3.2" />
 
   <!-- Librerías (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
@@ -166,13 +166,13 @@
       </div>
     </section>
 
-    <!-- ---------- PASO 1 · CORRECCIONES ---------- -->
+    <!-- ---------- PASO 1 · CORRECCIÓN DE pH ---------- -->
     <section class="step" data-step="1" hidden>
       <div class="step__head">
         <span class="step__num">2</span>
         <div>
-          <h2 class="step__title">Correcciones del suelo</h2>
-          <p class="step__sub">Activa las correcciones que aplique el ejercicio</p>
+          <h2 class="step__title">Corrección de pH</h2>
+          <p class="step__sub">Encalado con Carbonato de calcio (CaCO₃)</p>
         </div>
       </div>
 
@@ -204,6 +204,17 @@
             </label>
           </div>
           <p class="card__hint" id="phCaInfo"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PASO 2 · CORRECCIÓN DE FÓSFORO ---------- -->
+    <section class="step" data-step="2" hidden>
+      <div class="step__head">
+        <span class="step__num">3</span>
+        <div>
+          <h2 class="step__title">Corrección de Fósforo</h2>
+          <p class="step__sub">Corrección de Fósforo disponible del suelo (ppm)</p>
         </div>
       </div>
 
@@ -242,10 +253,10 @@
       </div>
     </section>
 
-    <!-- ---------- PASO 2 · NPK ---------- -->
-    <section class="step" data-step="2" hidden>
+    <!-- ---------- PASO 3 · NPK ---------- -->
+    <section class="step" data-step="3" hidden>
       <div class="step__head">
-        <span class="step__num">3</span>
+        <span class="step__num">4</span>
         <div>
           <h2 class="step__title">Fertilización NPK</h2>
           <p class="step__sub">Define fertilizantes y precios</p>
@@ -329,10 +340,10 @@
       </div>
     </section>
 
-    <!-- ---------- PASO 3 · EXTRAS ---------- -->
-    <section class="step" data-step="3" hidden>
+    <!-- ---------- PASO 4 · EXTRAS ---------- -->
+    <section class="step" data-step="4" hidden>
       <div class="step__head">
-        <span class="step__num">4</span>
+        <span class="step__num">5</span>
         <div>
           <h2 class="step__title">Micronutrientes y adicionales</h2>
           <p class="step__sub">Dosis directa (sin eficiencia de absorción)</p>
@@ -344,10 +355,10 @@
       </div>
     </section>
 
-    <!-- ---------- PASO 4 · RESULTADOS ---------- -->
-    <section class="step" data-step="4" hidden>
+    <!-- ---------- PASO 5 · RESULTADOS ---------- -->
+    <section class="step" data-step="5" hidden>
       <div class="step__head">
-        <span class="step__num">5</span>
+        <span class="step__num">6</span>
         <div>
           <h2 class="step__title">Resultados</h2>
           <p class="step__sub">Plan de fertilización calculado</p>
@@ -356,10 +367,10 @@
       <div id="resultsContainer"></div>
     </section>
 
-    <!-- ---------- PASO 5 · HISTORIAL ---------- -->
-    <section class="step" data-step="5" hidden>
+    <!-- ---------- PASO 6 · HISTORIAL ---------- -->
+    <section class="step" data-step="6" hidden>
       <div class="step__head">
-        <span class="step__num">6</span>
+        <span class="step__num">7</span>
         <div>
           <h2 class="step__title">Historial de planes</h2>
           <p class="step__sub">Planes guardados en este dispositivo</p>
@@ -491,15 +502,15 @@
   </div>
 
   <!-- ===== Scripts ===== -->
-  <script src="js/data.js?v=3.1"></script>
-  <script src="js/calc.js?v=3.1"></script>
-  <script src="js/storage.js?v=3.1"></script>
-  <script src="js/theme.js?v=3.1"></script>
-  <script src="js/ui.js?v=3.1"></script>
-  <script src="js/charts.js?v=3.1"></script>
-  <script src="js/results.js?v=3.1"></script>
-  <script src="js/export.js?v=3.1"></script>
-  <script src="js/app.js?v=3.1"></script>
+  <script src="js/data.js?v=3.2"></script>
+  <script src="js/calc.js?v=3.2"></script>
+  <script src="js/storage.js?v=3.2"></script>
+  <script src="js/theme.js?v=3.2"></script>
+  <script src="js/ui.js?v=3.2"></script>
+  <script src="js/charts.js?v=3.2"></script>
+  <script src="js/results.js?v=3.2"></script>
+  <script src="js/export.js?v=3.2"></script>
+  <script src="js/app.js?v=3.2"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));

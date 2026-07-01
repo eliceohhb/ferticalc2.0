@@ -6,7 +6,7 @@
 
 const App = {
   currentStep: 0,
-  totalSteps: 6,
+  totalSteps: 7,
   state: {},
 
   /* ---------- Init ---------- */
@@ -138,14 +138,14 @@ const App = {
       s.hidden = (+s.dataset.step !== step);
     });
 
-    // Si llegamos a resultados (4), calcular y renderizar
-    if (step === 4) {
+    // Si llegamos a resultados (5), calcular y renderizar
+    if (step === 5) {
       const calc = calcPlan(this.state);
       Results.render(this.state, calc);
       this._lastCalc = calc;
     }
-    // Si llegamos a historial (5), refrescar
-    if (step === 5) this.renderHistory();
+    // Si llegamos a historial (6), refrescar
+    if (step === 6) this.renderHistory();
 
     this.updateNav();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -157,7 +157,7 @@ const App = {
     const nextBtn = document.getElementById('nextBtn');
     if (step === this.totalSteps - 1) {
       nextBtn.textContent = '✓ Listo';
-    } else if (step === 4) {
+    } else if (step === 5) {
       nextBtn.textContent = 'Mis planes ›';
     } else {
       nextBtn.textContent = 'Siguiente ›';
@@ -170,7 +170,7 @@ const App = {
 
     const dots = document.getElementById('stepperDots');
     if (!dots.children.length) {
-      ['Datos','Correcciones','NPK','Extras','Resultados','Historial'].forEach((label, i) => {
+      ['Datos','pH','Fósforo','NPK','Extras','Resultados','Historial'].forEach((label, i) => {
         const d = document.createElement('span');
         d.className = 'stepper__dot'; d.textContent = label;
         d.style.cursor = 'pointer';
